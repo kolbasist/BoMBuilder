@@ -4,7 +4,6 @@ using System.Linq;
 using System.IO;
 using OfficeOpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
-using OfficeOpenXml.FormulaParsing;
 
 namespace BoMBuilder
 {
@@ -295,30 +294,27 @@ namespace BoMBuilder
                 GetDescription(descriptionSeparator);
             }
 
-            public Device(Device device, string descriptionSeparator = ". ")
+            public Device(Device device)
             {
-                _descriptionOne = device._descriptionOne;
-                _descriptionTwo = device._descriptionTwo;
-                _descriptionThree = device._descriptionThree;
+                _description = device._description;
                 _numberOfType = device._numberOfType;
                 _orderNumber = device._orderNumber;
                 _manufacturer = device._manufacturer;
                 _quantityUnit = device._quantityUnit;
                 _mass = device._mass;
                 _additionalDescription = device._additionalDescription;
-                this.GetDescription(descriptionSeparator);
             }
 
             private void GetDescription(string separator)
             {
-                if (_descriptionOne != string.Empty && _descriptionOne.EndsWith(separator) == false)                
+                if (_descriptionOne != string.Empty)                
                     _descriptionOne += separator;
                 
 
-                if (_descriptionTwo != string.Empty && _descriptionTwo.EndsWith(separator) == false)
+                if (_descriptionTwo != string.Empty)
                     _descriptionTwo = _descriptionTwo + separator;
 
-                if (_descriptionThree != string.Empty && _descriptionThree.EndsWith(separator) == false)
+                if (_descriptionThree != string.Empty)
                     _descriptionThree += separator;
 
                 _description = _descriptionOne + _descriptionTwo + _descriptionThree;
