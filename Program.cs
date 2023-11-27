@@ -12,7 +12,7 @@ namespace BoMBuilder
         static void Main(string[] args)
         {
             //string filePath = "D:\Users\Пользователь\Desktop\bom\test.xlsx";
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;            
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             Console.Write("Please enter bill of materials filename:");
             string filename = Console.ReadLine();
             Console.Write("Please enter count of header's rows:");
@@ -24,7 +24,7 @@ namespace BoMBuilder
             Console.WriteLine("Reading succesfull.");
             Console.Write("Press any key.");
             Console.ReadKey();
-            Console.Write("Please enter output file template:");
+            Console.Write("Please enter output file template (SeparatedBoMTemplate.xlsx) :");
             filename = Console.ReadLine();
             XLSWriter writer = new XLSWriter(filename);
             writer.GenerateXLS(cabinets);
@@ -42,13 +42,13 @@ namespace BoMBuilder
             public List<Cabinet> GenerateCabinets(int headerrowsCount, int uninformativeColumnsCount)
             {
                 List<Cabinet> cabinets = new List<Cabinet>();
-                List<BoMString> bomOrigin= GenerateList(headerrowsCount, uninformativeColumnsCount);
+                List<BoMString> bomOrigin = GenerateList(headerrowsCount, uninformativeColumnsCount);
                 List<string> identifiers = GetIdentifiersList(bomOrigin);
-                
+
                 foreach (string identifier in identifiers)
                 {
                     Cabinet cabinet = BuildCabinet(identifier, bomOrigin);
-                    cabinets.Add(cabinet); 
+                    cabinets.Add(cabinet);
                 }
 
                 return cabinets;
@@ -74,13 +74,13 @@ namespace BoMBuilder
                 ExcelWorksheet worksheet = _package.Workbook.Worksheets.ElementAtOrDefault(0);
                 List<BoMString> stringsList = new List<BoMString>();
 
-                for (int row = worksheet.Dimension.Start.Row + headerRowsQuantity; row <= worksheet.Dimension.End.Row -uninformativeColumnsQuantity; row++)
+                for (int row = worksheet.Dimension.Start.Row + headerRowsQuantity; row <= worksheet.Dimension.End.Row - uninformativeColumnsQuantity; row++)
                 {
                     object[] fragment = new object[worksheet.Dimension.End.Column];
 
                     for (int column = worksheet.Dimension.Start.Column + uninformativeColumnsQuantity; column <= worksheet.Dimension.End.Column; column++)
                     {
-                        fragment[column-uninformativeColumnsQuantity -1] = worksheet.Cells[row, column].GetValue<string>();
+                        fragment[column - uninformativeColumnsQuantity - 1] = worksheet.Cells[row, column].GetValue<string>();
                     }
 
                     string descriptionOne = string.Empty;
@@ -93,8 +93,11 @@ namespace BoMBuilder
                     int quantity = Convert.ToInt32(fragment[7]);
                     float mass = 0;
                     string note = string.Empty;
-                    string installationPlace = fragment[10].ToString();
+                    string installationPlace = string.Empty;
 
+                    if (fragment[10] != null)
+                        installationPlace = fragment[10].ToString();
+                   
                     if (fragment[0] != null)
                         descriptionOne = fragment[0].ToString();
 
@@ -166,10 +169,10 @@ namespace BoMBuilder
 
             public XLSWriter(string templateFilename)
             {
-                _package = new ExcelPackage(new FileInfo( templateFilename));
+                _package = new ExcelPackage(new FileInfo(templateFilename));
             }
 
-            public void GenerateXLS (List<Cabinet> cabinets, int headerRowsCount = 1, string subdirName = "output")
+            public void GenerateXLS(List<Cabinet> cabinets, int headerRowsCount = 1, string subdirName = "output")
             {
                 if (Directory.Exists(subdirName) == false)
                     Directory.CreateDirectory(subdirName);
@@ -180,24 +183,28 @@ namespace BoMBuilder
                     ExcelWorksheet worksheet = _package.Workbook.Worksheets.ElementAtOrDefault(0);
                     int rowsDelta = worksheet.Dimension.Start.Row;
                     int columnDelta = worksheet.Dimension.Start.Column;
-                    
-                    for (int row = 0 ; row < spredsheet.Count; row++)
+
+                    for (int row = 0; row < spredsheet.Count; row++)
                     {
-                        worksheet.Cells[row + rowsDelta + headerRowsCount, columnDelta].Value = (row+rowsDelta).ToString();
-                        for (int column = 0; column < spredsheet[row].Count ; column++)
+                        worksheet.Cells[row + rowsDelta + headerRowsCount, columnDelta].Value = (row + rowsDelta).ToString();
+                        for (int column = 0; column < spredsheet[row].Count; column++)
                         {
-                            worksheet.Cells[row + rowsDelta + headerRowsCount, column + columnDelta +1].Value = spredsheet[row][column];
+                            worksheet.Cells[row + rowsDelta + headerRowsCount, column + columnDelta + 1].Value = spredsheet[row][column];
                         }
                     }
 
-                    string fileName = subdirName + '\\' + cabinet.Identifier.ToLower()+ ".xlsx";
+                    string fileName = subdirName + '\\' + "empty" + ".xlsx";
+
+                    if(cabinet.Identifier != string.Empty)
+                        fileName = subdirName + '\\' + cabinet.Identifier.ToLower() + ".xlsx";
+
                     _package.SaveAs(new FileInfo(fileName));
                     Console.WriteLine(fileName + " - file saved. Press any key.");
                     Console.ReadKey();
 
-                    for (int row = worksheet.Dimension.Start.Row + headerRowsCount; row <= worksheet.Dimension.End.Row; row ++ )
-                        for (int column = worksheet.Dimension.Start.Column; column <=worksheet.Dimension.End.Column; column++ )
-                        worksheet.Cells[row, column].Value = null;
+                    for (int row = worksheet.Dimension.Start.Row + headerRowsCount; row <= worksheet.Dimension.End.Row; row++)
+                        for (int column = worksheet.Dimension.Start.Column; column <= worksheet.Dimension.End.Column; column++)
+                            worksheet.Cells[row, column].Value = null;
                 }
             }
         }
@@ -307,9 +314,9 @@ namespace BoMBuilder
 
             private void GetDescription(string separator)
             {
-                if (_descriptionOne != string.Empty)                
+                if (_descriptionOne != string.Empty)
                     _descriptionOne += separator;
-                
+
 
                 if (_descriptionTwo != string.Empty)
                     _descriptionTwo = _descriptionTwo + separator;
